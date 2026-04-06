@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司旧物交换平台 - 让闲置流动起来 ♻️</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --green: #10B981;
+            --green-light: #D1FAE5;
+            --orange: #F59E0B;
+            --orange-light: #FEF3C7;
+            --red: #EF4444;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-500: #6B7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--gray-50); color: var(--gray-900); }
+
+        /* ===== 顶部导航 ===== */
+        .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 0 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(79,70,229,0.3); }
+        .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .logo { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .logo-icon { font-size: 1.8rem; }
+        .nav { display: flex; gap: 0.5rem; }
+        .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.25); }
+        .user-info { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+        /* ===== 统计栏 ===== */
+        .stats-bar { background: white; border-bottom: 1px solid var(--gray-200); padding: 1rem 2rem; }
+        .stats-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+        .stat-card { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; border-radius: 12px; background: var(--gray-50); }
+        .stat-icon { font-size: 2rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .stat-icon.blue { background: #EEF2FF; }
+        .stat-icon.green { background: var(--green-light); }
+        .stat-icon.orange { background: var(--orange-light); }
+        .stat-icon.red { background: #FEE2E2; }
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-num { font-size: 1.5rem; font-weight: 700; color: var(--gray-900); }
+        .stat-label { font-size: 0.8rem; color: var(--gray-500); }
+
+        /* ===== 场景切换 ===== */
+        .scenes { max-width: 1200px; margin: 1.5rem auto; padding: 0 2rem; }
+        .scene-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .scene-tab { flex: 1; background: white; border: 2px solid var(--gray-200); border-radius: 16px; padding: 1.25rem; cursor: pointer; transition: all 0.3s; text-align: center; }
+        .scene-tab:hover { border-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .scene-tab.active { border-color: var(--primary); background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); }
+        .scene-tab-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .scene-tab-title { font-weight: 600; font-size: 0.95rem; color: var(--gray-900); }
+        .scene-tab-desc { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.25rem; }
+
+        /* ===== 内容区 ===== */
+        .content { max-width: 1200px; margin: 0 auto; padding: 0 2rem 2rem; }
+        .scene-panel { display: none; }
+        .scene-panel.active { display: block; }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .panel-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 10px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline { background: white; color: var(--primary); border: 1px solid var(--primary); padding: 0.6rem 1.5rem; border-radius: 10px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-outline:hover { background: #EEF2FF; }
+        .btn-green { background: var(--green); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+        .btn-green:hover { background: #059669; }
+        .btn-orange { background: var(--orange); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+        .btn-orange:hover { background: #D97706; }
+
+        .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-chip { background: white; border: 1px solid var(--gray-200); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .filter-chip:hover, .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* ===== 商品卡片网格 ===== */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+        .card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid var(--gray-200); transition: all 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .card-img { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 4rem; position: relative; }
+        .card-img.desk-bg { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+        .card-img.gear-bg { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); }
+        .card-img.trade-bg { background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%); }
+        .card-img.asset-bg { background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); }
+        .card-badge { position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; color: white; }
+        .badge-free { background: var(--green); }
+        .badge-sell { background: var(--orange); }
+        .badge-new { background: var(--primary); }
+        .badge-clearance { background: var(--red); }
+        .card-body { padding: 1rem; }
+        .card-title { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--gray-500); margin-bottom: 0.75rem; }
+        .card-seller { display: flex; align-items: center; gap: 0.4rem; }
+        .seller-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+        .card-price { font-size: 1.1rem; font-weight: 700; color: var(--red); }
+        .card-price.free { color: var(--green); }
+        .card-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .tag { padding: 0.2rem 0.5rem; background: var(--gray-100); border-radius: 4px; font-size: 0.75rem; color: var(--gray-500); }
+        .card-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--gray-100); display: flex; gap: 0.5rem; }
+        .card-footer .btn-primary, .card-footer .btn-outline, .card-footer .btn-green, .card-footer .btn-orange { flex: 1; justify-content: center; padding: 0.5rem; font-size: 0.8rem; }
+
+        /* ===== 以旧换新专区 ===== */
+        .trade-flow { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 16px; border: 1px solid var(--gray-200); }
+        .trade-step { flex: 1; text-align: center; padding: 1rem; }
+        .trade-step-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .trade-step-text { font-size: 0.9rem; font-weight: 600; }
+        .trade-step-desc { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.25rem; }
+        .trade-arrow { font-size: 1.5rem; color: var(--primary-light); }
+
+        /* ===== 部门资产清退表格 ===== */
+        .asset-table { width: 100%; background: white; border-radius: 16px; overflow: hidden; border: 1px solid var(--gray-200); }
+        .asset-table th { background: var(--gray-50); padding: 0.9rem 1rem; text-align: left; font-size: 0.85rem; color: var(--gray-500); font-weight: 600; border-bottom: 1px solid var(--gray-200); }
+        .asset-table td { padding: 0.9rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--gray-100); }
+        .asset-table tr:hover { background: var(--gray-50); }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: var(--orange-light); color: #92400E; }
+        .status-approved { background: var(--green-light); color: #065F46; }
+        .status-processing { background: #DBEAFE; color: #1E40AF; }
+        .progress-bar { width: 100%; height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+        .progress-fill.orange { background: var(--orange); }
+        .progress-fill.green { background: var(--green); }
+        .progress-fill.blue { background: var(--primary); }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: 20px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 2rem; position: relative; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background: var(--gray-100); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700); }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--gray-300); border-radius: 10px; font-size: 0.9rem; transition: border-color 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .upload-area { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .upload-area:hover { border-color: var(--primary); background: #F5F3FF; }
+        .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .upload-text { font-size: 0.85rem; color: var(--gray-500); }
+        .form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+        .form-actions button { flex: 1; padding: 0.75rem; border-radius: 10px; font-size: 0.95rem; cursor: pointer; border: none; }
+        .btn-submit { background: var(--primary); color: white; font-weight: 600; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-cancel { background: var(--gray-100); color: var(--gray-700); }
+        .btn-cancel:hover { background: var(--gray-200); }
+
+        /* ===== 底部 ===== */
+        .footer { text-align: center; padding: 2rem; color: var(--gray-500); font-size: 0.85rem; border-top: 1px solid var(--gray-200); margin-top: 2rem; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            .header-inner { flex-wrap: wrap; height: auto; padding: 1rem 0; gap: 0.5rem; }
+            .nav { order: 3; width: 100%; overflow-x: auto; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .scene-tabs { flex-wrap: wrap; }
+            .scene-tab { flex: 1 1 calc(50% - 0.5rem); min-width: 140px; }
+            .trade-flow { flex-direction: column; }
+            .trade-arrow { transform: rotate(90deg); }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+            .asset-table { font-size: 0.8rem; }
+            .asset-table th, .asset-table td { padding: 0.6rem 0.5rem; }
+        }
+
+        /* ===== 动画 ===== */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .scene-panel.active { animation: fadeIn 0.3s ease; }
+        .card { animation: fadeIn 0.4s ease; }
+    </style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo" onclick="showScene('home')">
+            <span class="logo-icon">♻️</span>
+            <span>旧物流转站</span>
+        </div>
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showScene('desk')">🧹 清理工位</button>
+            <button class="nav-btn" onclick="showScene('gear')">🛒 淘装备</button>
+            <button class="nav-btn" onclick="showScene('trade')">🔄 以旧换新</button>
+            <button class="nav-btn" onclick="showScene('asset')">📦 资产清退</button>
+        </nav>
+        <div class="user-info">
+            <div class="avatar">👤</div>
+            <span>张三 · 产品部</span>
+        </div>
+    </div>
+</header>
+
+<!-- ===== 统计栏 ===== -->
+<div class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-card">
+            <div class="stat-icon blue">📦</div>
+            <div class="stat-info">
+                <div class="stat-num" id="total-items">156</div>
+                <div class="stat-label">在流转物品</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">🤝</div>
+            <div class="stat-info">
+                <div class="stat-num">89</div>
+                <div class="stat-label">本月成交</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">💰</div>
+            <div class="stat-info">
+                <div class="stat-num">¥12,450</div>
+                <div class="stat-label">本月节省</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">♻️</div>
+            <div class="stat-info">
+                <div class="stat-num">23</div>
+                <div class="stat-label">部门清退中</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 场景面板 ===== -->
+<main class="content">
+
+    <!-- 场景一：清理工位 -->
+    <section id="panel-desk" class="scene-panel active">
+        <div class="panel-header">
+            <div class="panel-title">🧹 清理工位 — 闲置物品发布</div>
+            <button class="btn-primary" onclick="openModal('publish')">➕ 发布闲置</button>
+        </div>
+        <div class="filter-bar">
+            <span class="filter-chip active" onclick="filterCards(this)">全部</span>
+            <span class="filter-chip" onclick="filterCards(this)">📱 电子数码</span>
+            <span class="filter-chip" onclick="filterCards(this)">🪑 办公家具</span>
+            <span class="filter-chip" onclick="filterCards(this)">📚 图书文具</span>
+            <span class="filter-chip" onclick="filterCards(this)">🎁 其他</span>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <div class="card-img desk-bg">📱<span class="card-badge badge-free">免费送</span></div>
+                <div class="card-body">
+                    <div class="card-title">iPhone 12 测试机（9成新）</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>李四 · 技术部</span>
+                        <span>2小时前</span>
+                    </div>
+                    <div class="card-price free">免费认领</div>
+                    <div class="card-tags"><span class="tag">电子数码</span><span class="tag">已解锁</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-green">💬 联系卖家</button>
+                    <button class="btn-outline" onclick="openModal('claim')">❤️ 我要认领</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img desk-bg">🪑<span class="card-badge badge-sell">¥80</span></div>
+                <div class="card-body">
+                    <div class="card-title">人体工学椅（西昊 M18）</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>王五 · 市场部</span>
+                        <span>5小时前</span>
+                    </div>
+                    <div class="card-price">¥80 <small style="color: var(--gray-500); font-weight: 400;">原价 ¥899</small></div>
+                    <div class="card-tags"><span class="tag">办公家具</span><span class="tag">九成新</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-green">💬 联系卖家</button>
+                    <button class="btn-orange">💰 立即购买</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img desk-bg">📚<span class="card-badge badge-free">免费送</span></div>
+                <div class="card-body">
+                    <div class="card-title">设计心理学（全套4本）</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>赵六 · 设计部</span>
+                        <span>昨天</span>
+                    </div>
+                    <div class="card-price free">免费认领</div>
+                    <div class="card-tags"><span class="tag">图书</span><span class="tag">设计</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-green">💬 联系卖家</button>
+                    <button class="btn-outline" onclick="openModal('claim')">❤️ 我要认领</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img desk-bg">🖥️<span class="card-badge badge-sell">¥300</span></div>
+                <div class="card-body">
+                    <div class="card-title">Dell 24寸显示器 U2415</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>钱七 · 运维部</span>
+                        <span>3天前</span>
+                    </div>
+                    <div class="card-price">¥300 <small style="color: var(--gray-500); font-weight: 400;">原价 ¥1,800</small></div>
+                    <div class="card-tags"><span class="tag">电子数码</span><span class="tag">4K</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-green">💬 联系卖家</button>
+                    <button class="btn-orange">💰 立即购买</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 场景二：淘装备 -->
+    <section id="panel-gear" class="scene-panel">
+        <div class="panel-header">
+            <div class="panel-title">🛒 新入职淘装备 — 快速配齐工位</div>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" class="form-input" placeholder="🔍 搜索你需要的装备..." style="width: 260px;">
+                <button class="btn-primary">搜索</button>
+            </div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); padding: 1.25rem 1.5rem; border-radius: 14px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 2rem;">👋</span>
+            <div>
+                <div style="font-weight: 700; font-size: 1rem;">欢迎来到新装备专区！</div>
+                <div style="font-size: 0.85rem; color: #065F46;">这里集合了所有可以低价获取的办公用品和数码设备，新人一键配齐你的工位 💪</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <span class="filter-chip active" onclick="filterCards(this)">🎒 新手套装</span>
+            <span class="filter-chip" onclick="filterCards(this)">💻 笔记本电脑</span>
+            <span class="filter-chip" onclick="filterCards(this)">🖥️ 显示器</span>
+            <span class="filter-chip" onclick="filterCards(this)">🎧 外设配件</span>
+            <span class="filter-chip" onclick="filterCards(this)">📦 办公套装</span>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-img gear-bg">🎒<span class="card-badge badge-new">新人推荐</span></div>
+                <div class="card-body">
+                    <div class="card-title">新人标配套装（显示器+键盘+鼠标）</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>IT部门直供</span>
+                        <span>10套库存</span>
+                    </div>
+                    <div class="card-price">¥150 <small style="color: var(--gray-500); font-weight: 400;">套装价</small></div>
+                    <div class="card-tags"><span class="tag">套装</span><span class="tag">即领即用</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-green">🛒 一键配齐</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img gear-bg">💻<span class="card-badge badge-sell">¥800</span></div>
+                <div class="card-body">
+                    <div class="card-title">ThinkPad X1 Carbon (2021)</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>行政部回收</span>
+                        <span>3台库存</span>
+                    </div>
+                    <div class="card-price">¥800 <small style="color: var(--gray-500); font-weight: 400;">原价 ¥12,000</small></div>
+                    <div class="card-tags"><span class="tag">笔记本</span><span class="tag">i7/16G/512G</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-orange">💰 申请购买</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img gear-bg">🖥️<span class="card-badge badge-sell">¥200</span></div>
+                <div class="card-body">
+                    <div class="card-title">27寸 4K 显示器（LG 27UK600）</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>行政部回收</span>
+                        <span>6台库存</span>
+                    </div>
+                    <div class="card-price">¥200 <small style="color: var(--gray-500); font-weight: 400;">原价 ¥2,499</small></div>
+                    <div class="card-tags"><span class="tag">显示器</span><span class="tag">4K HDR</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-orange">💰 申请购买</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img gear-bg">🎧<span class="card-badge badge-sell">¥50</span></div>
+                <div class="card-body">
+                    <div class="card-title">罗技 MX Master 3 鼠标</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>多个卖家</span>
+                        <span>8个库存</span>
+                    </div>
+                    <div class="card-price">¥50 <small style="color: var(--gray-500); font-weight: 400;">原价 ¥699</small></div>
+                    <div class="card-tags"><span class="tag">鼠标</span><span class="tag">无线</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-orange">💰 申请购买</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 场景三：以旧换新 -->
+    <section id="panel-trade" class="scene-panel">
+        <div class="panel-header">
+            <div class="panel-title">🔄 以旧换新 — 旧设备折价换新</div>
+            <button class="btn-primary" onclick="openModal('trade')">📤 发起换新</button>
+        </div>
+
+        <div class="trade-flow">
+            <div class="trade-step">
+                <div class="trade-step-icon">📱</div>
+                <div class="trade-step-text">提交旧设备</div>
+                <div class="trade-step-desc">拍照描述你的旧物</div>
+            </div>
+            <div class="trade-arrow">→</div>
+            <div class="trade-step">
+                <div class="trade-step-icon">🔍</div>
+                <div class="trade-step-text">系统评估</div>
+                <div class="trade-step-desc">自动估价给出折抵</div>
+            </div>
+            <div class="trade-arrow">→</div>
+            <div class="trade-step">
+                <div class="trade-step-icon">💰</div>
+                <div class="trade-step-text">获得积分</div>
+                <div class="trade-step-desc">兑换心仪物品</div>
+            </div>
+            <div class="trade-arrow">→</div>
+            <div class="trade-step">
+                <div class="trade-step-icon">🎁</div>
+                <div class="trade-step-text">换新成功</div>
+                <div class="trade-step-desc">旧物回收新物到手</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <span class="filter-chip active" onclick="filterCards(this)">🔄 进行中的换新</span>
+            <span class="filter-chip" onclick="filterCards(this)">✅ 已完成</span>
+            <span class="filter-chip" onclick="filterCards(this)">⏳ 待评估</span>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-img trade-bg">📱</div>
+                <div class="card-body">
+                    <div class="card-title">iPhone 11 → 换 MacBook Air</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>张三（你）</span>
+                        <span>评估中</span>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                            <span>评估进度</span><span>60%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill orange" style="width: 60%;"></div></div>
+                    </div>
+                    <div class="card-tags"><span class="tag">折抵预估 ¥800</span><span class="tag">还需补 ¥3,200</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-outline">查看详情</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img trade-bg">💻</div>
+                <div class="card-body">
+                    <div class="card-title">旧笔记本 → 换显示器 + 键鼠套装</div>
+                    <div class="card-meta">
+                        <span class="card-seller"><span class="seller-dot"></span>李四</span>
+                        <span>已完成 ✅</span>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <div class="progress-bar"><div class="progress-fill green" style="width: 100%;"></div></div>
+                    </div>
+                    <div class="card-tags"><span class="tag">折抵 ¥500</span><span class="tag">换得 ¥450 物品</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-outline">查看订单</button>
+                </div>
+            </div>
+            <div class="card" style="border: 2px dashed var(--primary-light); background: #F5F3FF; cursor: pointer;" onclick="openModal('trade')">
+                <div class="card-img trade-bg" style="background: transparent;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem;">➕</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">发起新的以旧换新</div>
+                    </div>
+                </div>
+                <div class="card-body" style="text-align: center; color: var(--primary);">
+                    提交你的旧设备，换取心仪好物
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 场景四：部门资产清退 -->
+    <section id="panel-asset" class="scene-panel">
+        <div class="panel-header">
+            <div class="panel-title">📦 部门资产清退</div>
+            <button class="btn-primary" onclick="openModal('asset')">📝 提交清退申请</button>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #FEE2E2, #FECACA); padding: 1.25rem 1.5rem; border-radius: 14px; margin-bottom: 1.5rem;">
+            <div style="font-weight: 700; margin-bottom: 0.5rem;">📋 清退规则</div>
+            <div style="font-size: 0.85rem; color: #991B1B;">
+                部门批量清退资产需提前 3 个工作日提交申请 → 行政部审批 → IT 数据擦除 → 上架流转 → 员工认领/折价购买
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--gray-200);">
+                <div style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;">📊 进行中</div>
+                <div style="font-size: 1.5rem; font-weight: 700;">3 批次</div>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--gray-200);">
+                <div style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;">📦 清退物品</div>
+                <div style="font-size: 1.5rem; font-weight: 700;">47 件</div>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--gray-200);">
+                <div style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;">✅ 已流转</div>
+                <div style="font-size: 1.5rem; font-weight: 700;">32 件</div>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--gray-200);">
+                <div style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;">💰 回笼资金</div>
+                <div style="font-size: 1.5rem; font-weight: 700;">¥8,650</div>
+            </div>
+        </div>
+
+        <table class="asset-table">
+            <thead>
+                <tr>
+                    <th>批次号</th>
+                    <th>申请部门</th>
+                    <th>物品数量</th>
+                    <th>状态</th>
+                    <th>进度</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>#QT-2026-0401</strong></td>
+                    <td>技术部</td>
+                    <td>15 件</td>
+                    <td><span class="status-badge status-approved">审批通过</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="progress-bar" style="width: 100px;"><div class="progress-fill green" style="width: 80%;"></div></div>
+                            <span style="font-size: 0.8rem;">IT擦除中</span>
+                        </div>
+                    </td>
+                    <td><button class="btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">详情</button></td>
+                </tr>
+                <tr>
+                    <td><strong>#QT-2026-0402</strong></td>
+                    <td>市场部</td>
+                    <td>8 件</td>
+                    <td><span class="status-badge status-processing">数据擦除</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="progress-bar" style="width: 100px;"><div class="progress-fill blue" style="width: 60%;"></div></div>
+                            <span style="font-size: 0.8rem;">擦除中</span>
+                        </div>
+                    </td>
+                    <td><button class="btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">详情</button></td>
+                </tr>
+                <tr>
+                    <td><strong>#QT-2026-0403</strong></td>
+                    <td>设计部</td>
+                    <td>24 件</td>
+                    <td><span class="status-badge status-pending">待审批</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="progress-bar" style="width: 100px;"><div class="progress-fill orange" style="width: 20%;"></div></div>
+                            <span style="font-size: 0.8rem;">等待审批</span>
+                        </div>
+                    </td>
+                    <td><button class="btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">详情</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<!-- ===== 模态框：发布闲置 ===== -->
+<div class="modal-overlay" id="modal-publish">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('publish')">✕</button>
+        <div class="modal-title">📦 发布闲置物品</div>
+        <div class="form-group">
+            <label class="form-label">物品名称</label>
+            <input type="text" class="form-input" placeholder="例：iPhone 12 测试机">
+        </div>
+        <div class="form-group">
+            <label class="form-label">物品分类</label>
+            <select class="form-select">
+                <option>📱 电子数码</option>
+                <option>🪑 办公家具</option>
+                <option>📚 图书文具</option>
+                <option>🎁 其他</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">处理方式</label>
+            <select class="form-select">
+                <option>🎁 免费赠送</option>
+                <option>💰 折价出售</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">价格（元，免费则填0）</label>
+            <input type="number" class="form-input" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label class="form-label">物品描述</label>
+            <textarea class="form-textarea" placeholder="描述物品的成色、使用情况..."></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">上传照片</label>
+            <div class="upload-area">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击或拖拽上传照片</div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-cancel" onclick="closeModal('publish')">取消</button>
+            <button class="btn-submit" onclick="submitForm('发布')">📦 发布物品</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 模态框：认领 ===== -->
+<div class="modal-overlay" id="modal-claim">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('claim')">✕</button>
+        <div class="modal-title">❤️ 认领物品</div>
+        <div style="background: #FEF3C7; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;">
+            你正在认领：<strong>设计心理学（全套4本）</strong><br>
+            卖家：赵六 · 设计部
+        </div>
+        <div class="form-group">
+            <label class="form-label">领取方式</label>
+            <select class="form-select">
+                <option>🚶 自取（到对方工位领取）</option>
+                <option>📮 行政代收（放到前台）</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">留言给卖家</label>
+            <textarea class="form-textarea" placeholder="Hi，我想要这本书..."></textarea>
+        </div>
+        <div class="form-actions">
+            <button class="btn-cancel" onclick="closeModal('claim')">取消</button>
+            <button class="btn-submit" onclick="submitForm('认领')">❤️ 确认认领</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 模态框：以旧换新 ===== -->
+<div class="modal-overlay" id="modal-trade">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('trade')">✕</button>
+        <div class="modal-title">🔄 发起以旧换新</div>
+        <div class="form-group">
+            <label class="form-label">旧设备名称</label>
+            <input type="text" class="form-input" placeholder="例：iPhone 11 256G">
+        </div>
+        <div class="form-group">
+            <label class="form-label">成色评估</label>
+            <select class="form-select">
+                <option>9-9.5成新（几乎全新）</option>
+                <option>8-9成新（轻微使用痕迹）</option>
+                <option>7-8成新（正常使用痕迹）</option>
+                <option>7成新以下（明显磨损）</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">想换什么？</label>
+            <input type="text" class="form-input" placeholder="例：MacBook Air M2">
+        </div>
+        <div class="form-group">
+            <label class="form-label">上传旧设备照片</label>
+            <div class="upload-area">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">上传设备正面、背面、屏幕照片</div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-cancel" onclick="closeModal('trade')">取消</button>
+            <button class="btn-submit" onclick="submitForm('换新申请')">🔄 提交评估</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 模态框：资产清退 ===== -->
+<div class="modal-overlay" id="modal-asset">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('asset')">✕</button>
+        <div class="modal-title">📝 部门资产清退申请</div>
+        <div class="form-group">
+            <label class="form-label">申请部门</label>
+            <select class="form-select">
+                <option>技术部</option>
+                <option>市场部</option>
+                <option>设计部</option>
+                <option>产品部</option>
+                <option>运营部</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">资产清单（可批量导入）</label>
+            <textarea class="form-textarea" placeholder="资产编号 | 物品名称 | 数量 | 备注&#10;A-001 | MacBook Pro 2019 | 5台 | 已备份数据&#10;A-002 | Dell 显示器 | 10台 | 配件齐全"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">清退原因</label>
+            <select class="form-select">
+                <option>部门搬迁/合并</option>
+                <option>设备升级替换</option>
+                <option>项目结束清理</option>
+                <option>其他</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">期望完成日期</label>
+            <input type="date" class="form-input">
+        </div>
+        <div class="form-actions">
+            <button class="btn-cancel" onclick="closeModal('asset')">取消</button>
+            <button class="btn-submit" onclick="submitForm('清退申请')">📦 提交申请</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Toast 提示 ===== -->
+<div id="toast" style="display:none; position:fixed; top:80px; left:50%; transform:translateX(-50%); background: var(--green); color:white; padding: 0.75rem 2rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; z-index: 300; box-shadow: 0 4px 15px rgba(16,185,129,0.4);"></div>
+
+<footer class="footer">
+    ♻️ 公司旧物流转平台 Demo v1.0 · 让闲置流动起来，让资源发挥价值
+</footer>
+
+<script>
+    // 场景切换
+    function showScene(scene) {
+        document.querySelectorAll('.scene-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + scene).classList.add('active');
+        const btns = document.querySelectorAll('.nav-btn');
+        const map = { desk: 0, gear: 1, trade: 2, asset: 3 };
+        if (map[scene] !== undefined) btns[map[scene]].classList.add('active');
+    }
+
+    // 筛选标签
+    function filterCards(el) {
+        el.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // 模态框
+    function openModal(name) {
+        document.getElementById('modal-' + name).classList.add('show');
+    }
+    function closeModal(name) {
+        document.getElementById('modal-' + name).classList.remove('show');
+    }
+
+    // 提交表单
+    function submitForm(type) {
+        showToast('✅ ' + type + '已提交成功！');
+        // 关闭所有模态框
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+    }
+
+    // Toast 提示
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // 点击遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('show');
+        });
+    });
+</script>
+</body>
+</html>

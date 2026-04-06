@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSS 凭证输入（仅本机）</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 420px; width: 100%; }
+        h2 { margin-bottom: 0.5rem; color: #1a1a2e; }
+        p { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; color: #333; }
+        input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; margin-bottom: 1rem; transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: #4F46E5; }
+        button { width: 100%; padding: 0.85rem; background: #4F46E5; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        button:hover { background: #3730A3; }
+        .msg { margin-top: 1rem; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+        .msg.ok { display: block; background: #D1FAE5; color: #065F46; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🔑 OSS 凭证配置</h2>
+        <p>填写后自动上传，数据不会保存到磁盘</p>
+        <form id="ossForm">
+            <label>AccessKey ID</label>
+            <input type="text" id="akId" placeholder="LTAI..." required>
+            <label>AccessKey Secret</label>
+            <input type="password" id="akSecret" placeholder="输入后不可见" required>
+            <button type="submit">🚀 确认并开始上传</button>
+        </form>
+        <div class="msg" id="msg"></div>
+    </div>
+    <script>
+        document.getElementById('ossForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            btn.textContent = '⏳ 上传中...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        accessKeyId: document.getElementById('akId').value,
+                        accessKeySecret: document.getElementById('akSecret').value
+                    })
+                });
+                const data = await res.json();
+                const msg = document.getElementById('msg');
+                msg.className = 'msg ' + (data.ok ? 'ok' : '');
+                msg.textContent = data.message;
+                msg.style.display = 'block';
+                btn.textContent = data.ok ? '✅ 完成' : '❌ 失败，重试';
+                btn.disabled = false;
+            } catch(err) {
+                alert('请求失败: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = '重试';
+            }
+        });
+    </script>
+</body>
+</html>
